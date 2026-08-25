@@ -60,7 +60,7 @@ Markdown Knowledge Base
               Retrieved Context          lookup_order()
                                                |
                                                v
-                                         orders.json
+                                          orders.json
                                                |
                                                v
                                       Customer-safe fields
@@ -255,15 +255,59 @@ This prevents superseded, draft, internal, or non-authoritative documents from b
 
 The initial retrieval baseline used semantic similarity without metadata filtering.
 
-For the query:
+Query:
 
-`How long do I have to return an item?`
+```text
+How long do I have to return an item?
+```
 
-the superseded `RET-2024-01` return-window section ranked first with a similarity score of `0.6951`.
+The initial top-10 retrieval result was:
 
-The active `RET-2026-01` standard return-window section ranked eighth with a score of `0.4758`.
+```text
+Score :  0.6950674057006836
+RET-2024-01 superseded Return window
 
-This showed that semantic similarity alone could rank outdated policy above the current policy.
+Score :  0.6403814554214478
+RET-2024-01 superseded Refund timing
+
+Score :  0.5813907384872437
+RET-2026-01 active Exclusions and exceptions
+
+Score :  0.5454387664794922
+RET-2026-01 active Return shipping and refunds
+
+Score :  0.5115174055099487
+RET-2026-01 active Item condition
+
+Score :  0.5026186108589172
+OPS-2026-04 active Reports after seven days
+
+Score :  0.5025029182434082
+RET-2024-01 superseded Return shipping
+
+Score :  0.4758032262325287
+RET-2026-01 active Standard return window
+
+Score :  0.47448742389678955
+RET-2026-02 active Bundles
+
+Score :  0.46234411001205444
+OPS-2026-04 active Available resolutions
+```
+
+The important baseline result was:
+
+```text
+1. RET-2024-01  Return window
+   Score : 0.6951
+   Status : superseded
+
+8. RET-2026-01  Standard return window
+   Score : 0.4758
+   Status : active
+```
+
+This showed that semantic similarity alone could rank an outdated policy above the current policy.
 
 The final system added metadata filtering for:
 
@@ -272,6 +316,8 @@ The final system added metadata filtering for:
 - `audience = customer`
 
 This prevents superseded, draft, and internal documents from being treated as customer-facing policy authority.
+
+The baseline above is a retrieval baseline. It is not an overall evaluation score.
 
 ## LLM
 
@@ -397,35 +443,22 @@ Sources
 
 The model is instructed to cite only sources that were actually provided in the retrieved context.
 
-Score :  0.6950674057006836
-0.6950674057006836 RET-2024-01 superseded Return window
+## Observability
 
-Score :  0.6403814554214478
-0.6403814554214478 RET-2024-01 superseded Refund timing
+During development, terminal output was used to inspect the agent's behavior.
 
-Score :  0.5813907384872437
-0.5813907384872437 RET-2026-01 active Exclusions and exceptions
+The debug output was used to inspect:
 
-Score :  0.5454387664794922
-0.5454387664794922 RET-2026-01 active Return shipping and refunds
+- current user queries
+- retrieved document IDs
+- retrieved sections
+- similarity scores
+- retrieved content
+- tool calls and arguments
+- sanitized tool results
+- final model responses
 
-Score :  0.5115174055099487
-0.5115174055099487 RET-2026-01 active Item condition
-
-Score :  0.5026186108589172
-0.5026186108589172 OPS-2026-04 active Reports after seven days
-
-Score :  0.5025029182434082
-0.5025029182434082 RET-2024-01 superseded Return shipping
-
-Score :  0.4758032262325287
-0.4758032262325287 RET-2026-01 active Standard return window
-
-Score :  0.47448742389678955
-0.47448742389678955 RET-2026-02 active Bundles
-
-Score :  0.46234411001205444
-0.46234411001205444 OPS-2026-04 active Available resolutions
+This made it possible to inspect retrieval quality, tool behavior, and model responses during development without exposing internal customer fields or API keys.
 
 ## Evaluation
 
@@ -646,7 +679,7 @@ A production implementation would require:
 
 ### Source Conflicts
 
-The system can identify conflicting active sources and recommend human review, but it does not have a deterministic conflict-resolution engine.
+The system can surface conflicting active sources and recommend human review, but it does not have a deterministic conflict-resolution engine.
 
 Production conflict resolution should consider:
 
@@ -739,13 +772,27 @@ The generated suggestions were therefore tested and verified rather than used wi
 
 ## Demo
 
-The final demonstration covers:
+A short demonstration video/GIF should be included with the repository and linked or embedded here.
+
+The demonstration covers:
 
 1. A knowledge-base question with source citations.
 2. An order lookup using the structured tool.
 3. A multi-turn conversation.
-4. An insufficient-information/refusal case.
+4. An insufficient-information/refusal or human-handoff case.
 5. The evaluation suite and final results.
+
+Add the actual demo file to the repository and use one of the following:
+
+```markdown
+[Watch the agent demonstration](./demo.mp4)
+```
+
+or, for a GIF:
+
+```markdown
+![Agent Demonstration](./demo.gif)
+```
 
 Run the evaluation with:
 
@@ -777,6 +824,7 @@ The system implements:
 - Privacy protection
 - Prompt-injection mitigation
 - Evaluation suite
+- Development-time observability
 - Final evaluation
 
 **Final evaluation score: 51/75 (68.0%)**
