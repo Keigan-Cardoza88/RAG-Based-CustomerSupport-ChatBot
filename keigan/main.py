@@ -1,6 +1,6 @@
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-from parser import parser
+from keigan.parser import parser
 from pathlib import Path
 import faiss
 import numpy as np
@@ -279,16 +279,11 @@ def agent(query, messages=None):
 
 #--------------------------------------------------------------------
 
-# Creating the simple cli
-conversation = []
-print("\nAster & Row Support Assistant")
-print("Type 'exit' to quit.\n")
-while True:
-    query = input("You: ").strip()
-    if query.lower() == "exit":
-        break
-    if not query:
-        continue
-    answer = agent(query, conversation)
-    print("\nAssistant:", answer)
-    print()
+if __name__ == "__main__":
+    print("Aster & Row Support Assistant")
+    print("Type 'exit' to quit.")
+    while True:
+        query = input("\nYou : ")
+        if query.lower() == "exit":
+            break
+        print(agent(query))
